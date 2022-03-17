@@ -5,15 +5,15 @@ channels:
 dependencies:
   - python=3.9
   - boto3
-  - Cerberus
+  - cerberus
   - geojson
   - mapbox-vector-tile
   - mercantile
   - numpy
-  - Pillow
+  - pillow
   - rasterio
   - requests
-  - Shapely
+  - shapely
   - tilepie
   - tippecanoe
   - tqdm
