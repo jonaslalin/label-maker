@@ -26,7 +26,7 @@ from label_maker.palette import class_color
 tile_results = dict()
 
 # clip all geometries to a tile
-clip_mask = Polygon(((0, 0), (0, 255), (255, 255), (255, 0), (0, 0)))
+clip_mask = Polygon(((0, 0), (0, 511), (511, 511), (511, 0), (0, 0)))
 
 def make_labels(dest_folder, zoom, country, classes, ml_type, bounding_box, sparse, **kwargs):
     """Create label data from OSM QA tiles for specified classes
@@ -153,7 +153,7 @@ def make_labels(dest_folder, zoom, country, classes, ml_type, bounding_box, spar
             # if we have any class pixels
             if np.sum(label):
                 label_file = '{}.png'.format(tile)
-                visible_label = np.array([class_color(l) for l in np.nditer(label)]).reshape(256, 256, 3)
+                visible_label = np.array([class_color(l) for l in np.nditer(label)]).reshape(512, 512, 3)
                 img = Image.fromarray(visible_label.astype(np.uint8))
                 print('Writing {}'.format(label_file))
                 img.save(op.join(label_folder, label_file))
@@ -233,7 +233,7 @@ def _mapper(x, y, z, data, args):
                             geo = geo.buffer(cl.get('buffer'), 4)
                         if not geo.is_empty:
                             geos.append((mapping(geo), i + 1))
-            result = rasterize(geos, out_shape=(256, 256))
+            result = rasterize(geos, out_shape=(512, 512))
             return ('{!s}-{!s}-{!s}'.format(x, y, z), result)
     return ('{!s}-{!s}-{!s}'.format(x, y, z), np.array())
 
@@ -272,8 +272,8 @@ def _pixel_bounds_convert(x):
     (i, b) = x
     # input bounds are in the range 0-4096 by default: https://github.com/tilezen/mapbox-vector-tile
     # we want them to match our fixed imagery size of 256
-    pixel = round(b * 255. / 4096) # convert to tile pixels
-    return pixel if (i % 2 == 0) else 255 - pixel # flip the y axis
+    pixel = round(b * 511. / 4096) # convert to tile pixels
+    return pixel if (i % 2 == 0) else 511 - pixel # flip the y axis
 
 def _callback(tile_label):
     """Attach tile labels to a global tile_results dict"""
@@ -322,5 +322,5 @@ def _create_empty_label(ml_type, classes):
     elif ml_type == 'object-detection':
         return np.empty((0, 5), dtype=np.int)
     elif ml_type == 'segmentation':
-        return np.zeros((256, 256), dtype=np.int)
+        return np.zeros((512, 512), dtype=np.int)
     return None
